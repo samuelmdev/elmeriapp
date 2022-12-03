@@ -41,34 +41,6 @@ const Report = () => {
   let tCount = 0
   let oCount = 0
 
-  let waitForPressResolve
-
-  const waitForPress = () => {
-    return new Promise(resolve => waitForPressResolve = resolve)
-  }
-
-  const btnResolver = () => {
-    if (waitForPressResolve) waitForPressResolve()
-  }
-
-  const nextButton = document.querySelector('nextBtn')
-
-  const TargetLoop = async () => {
-    for (let t in obsObjects) {
-      console.log('loop aloitettu')
-      setTarget(t.target)
-      for (let o in obsObjects[t].objs) {
-        setTargetObs(o.obj)
-        objCompleted = false
-        nextButton.addEventListener('click', btnResolver)
-        console.log('odottaa nappia')
-        ObjectTarget({obsName: targetObs, completed: objCompleted})
-        await waitForPress()
-        nextButton.removeEventListener('click', btnResolver)
-      }
-    }
-  }
-
   const nextPressed = () => {
     objCompleted = true
   }

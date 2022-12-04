@@ -1,16 +1,20 @@
 import React, { useState } from 'react';
 import Select from 'react-select';
 
-const Dropdown3 =(props, {setLab}) => {
+const Dropdown3 =({list}) => {
   const [selectedOption, setSelectedOption] = useState(null);
-  let options = props.list
-
+  console.log('lista on dropdownissa', list)
+  let options = []
+  list.forEach((item) => options.push([{value: `${item.obj}`, label: `${item.obj}`}]))
+  
+  console.log('mapattu lista:',list.map((item) => item.obj))
+  console.log('options lista: ', options)
 
   return (
     <div>
       <Select
         defaultValue={selectedOption}
-        onChange={setLab}
+        onChange={setSelectedOption}
         options={options}
       />
     </div>

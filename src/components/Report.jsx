@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react'
 import Dropdown2 from './Dropdown2';
 import Item from './Item';
+import Itemselector from './Itemselector';
 import ObjectTarget from './ObjectTarget';
 
 const Report = () => {
@@ -26,7 +27,7 @@ const Report = () => {
   const [observers, setObservers] = useState("");
  // const [targetCount, setTargetCount] = useState(0);
   const [obsCount, setObsCount] = useState(1);
-  const [targetObs, setTargetObs] = useState(null);
+  const [targetObs, setTargetObs] = useState([]);
   const childStateRef = useRef();
   const [target, setTarget] = useState(null)
 
@@ -50,19 +51,7 @@ const Report = () => {
     setLab(childState.label)
     targetSelector()
     obsSelector()
-  }
-
-  const countTarget = () => {
-    if(targetCount < (targetQuantity - 1)) {
-      console.log(targetCount)
-      console.log(targetQuantity)
-      targetCount++}
-  }
-
-  const countObs = () => {
-    if (obsCount <= currentObsCount) {
-      setObsCount(obsCount + 1)
-    }
+    obsCounter()
   }
 
   const countTargetQuantity = () => {
@@ -72,23 +61,21 @@ const Report = () => {
     return targetQuantity
   }
 
-  const countTargetObsQuantity = () => {
-    let currentObsList = [] = obsObjects[targetCount].objs
-    currentObsCount = 0
-    currentObsList.forEach(obs => {
-      currentObsCount++
-    })
-    console.log(currentObsCount)
-    return currentObsCount
-  }
-
   const targetSelector = () => {
     setTarget(obsObjects[targetCount].target)
-    countTargetObsQuantity()
   }
 
   const obsSelector = () => {
-    setTargetObs(obsObjects[targetCount].objs[0].obj)
+    setTargetObs(obsObjects[targetCount].objs)
+  }
+
+  const obsCounter = () => {
+    oCount = 0
+    for(Object in targetObs) {oCount++}
+  }
+
+  const obsLabel = () => {
+    targetObs.map((item) => item.obj)
   }
   
   const NextButtonLabel = () => {
@@ -98,25 +85,9 @@ const Report = () => {
 
   const nextTarget = () => {
     console.log('Seuraava painettu')
-    console.log(target)
-    if (obsCount === currentObsCount) {
-      countTargetObsQuantity()
-      targetSelector()
-      obsSelector()
-      countTarget()
-      setObsCount(1)
-      return
-    }
-    countObs()
-    obsSelector()
-  }
-
-  const handleObservers = event => {
-    setObservers(event.target.value)
   }
 
   const ChooseLab = () => {
-   // setObsTarget(obsObjects[targetCount].objs)
     return (
       <div>
         <p>Havainnoitsijat: </p>
@@ -136,17 +107,18 @@ const Report = () => {
 
   const LabChosen = () => {
     console.log(observers)
-    countTargetObsQuantity()
-    countTargetQuantity()
+    console.log(target)
+    console.log(targetObs)
     return (
       <div>
         <p>Havainnoitsijat: {observers}</p>
         <p>Valittu tila: <span className='font-bold'>{lab}</span></p>
         <p>Tarkastelukohde: <span className='font-bold'>{target}</span></p>
-        <p>Kohta: {obsCount}/{countTargetObsQuantity()}: <span className='font-bold'>{targetObs}</span></p>
+        <p>Kohta: <span className='font-bold'>{targetObs[0].obj}</span></p>
+        {(oCount === 1) ? obsLabel() : <Itemselector list={targetObs}/>}
+        <Itemselector list={targetObs}/>
         <Item />
-        <TargetLoop />
-        <button className="nextBtn" onClick={() => nextPressed()}><NextButtonLabel /></button>
+        <button className="nextBtn" onClick={() => nextPressed()}>{NextButtonLabel()}</button>
       </div>
     )
   }

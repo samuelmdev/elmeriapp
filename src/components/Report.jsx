@@ -2,7 +2,6 @@ import React, { useState, useRef } from 'react'
 import Dropdown2 from './Dropdown2';
 import Item from './Item';
 import Itemselector from './Itemselector';
-import ObjectTarget from './ObjectTarget';
 
 const Report = () => {
 
@@ -25,16 +24,15 @@ const Report = () => {
   const [started, setStarted] = useState(false);
   const [lab, setLab] = useState(null);
   const [observers, setObservers] = useState("");
- // const [targetCount, setTargetCount] = useState(0);
-  const [obsCount, setObsCount] = useState(1);
+  const [targetCount, setTargetCount] = useState(0);
   const [targetObs, setTargetObs] = useState([]);
   const childStateRef = useRef();
   const [target, setTarget] = useState(null)
+  const [selectedObs, setSelectedObs] = useState(null)
+  const [obsCount, setObsCount] = useState(0)
 
-  let count = 0;
   let obsNumber = 0;
   let currentObsCount = 0
-  let targetCount = 0
   let targetQuantity = 0
 
   let objCompleted = false
@@ -43,15 +41,30 @@ const Report = () => {
   let oCount = 0
 
   const nextPressed = () => {
-    objCompleted = true
+    if (obsCount <= 1) {
+      setTargetCount(targetCount + 1)
+      targetSelector()
+      obsCounter()
+      return
+    }
+    if (obsCount > 1) {
+      let list = targetObs
+      let filtered = list.filter(item => {return item.obj !== selectedObs})
+      console.log('filtered list ', filtered)
+      setTargetObs(filtered)
+      obsCounter()
+    }
   }
 
   const  getChildState = () => {
     let childState = childStateRef.current.getChildOption()
     setLab(childState.label)
     targetSelector()
-    obsSelector()
     obsCounter()
+  }
+
+  const handleObsChange = String => {
+    setSelectedObs(String)
   }
 
   const countTargetQuantity = () => {
@@ -63,28 +76,24 @@ const Report = () => {
 
   const targetSelector = () => {
     setTarget(obsObjects[targetCount].target)
-  }
-
-  const obsSelector = () => {
     setTargetObs(obsObjects[targetCount].objs)
+    console.log('targetCount on: ',targetCount)
   }
 
   const obsCounter = () => {
-    oCount = 0
-    for(Object in targetObs) {oCount++}
+    setObsCount(0)
+   // let obsCounter = targetObs.length
+   // setObsCount(obsCounter)
+   // console.log('Obsien maara: ', obsCounter)
   }
 
   const obsLabel = () => {
-    targetObs.map((item) => item.obj)
+    return targetObs.map((item) => item.obj)
   }
   
   const NextButtonLabel = () => {
     if (obsCount === currentObsCount) return 'Seuraava kohde'
     return 'Seuraava kohta'
-  }
-
-  const nextTarget = () => {
-    console.log('Seuraava painettu')
   }
 
   const ChooseLab = () => {
@@ -109,14 +118,15 @@ const Report = () => {
     console.log(observers)
     console.log(target)
     console.log(targetObs)
+    console.log('kohta label:', obsLabel())
+    console.log('objektien maara: ', obsCount)
     return (
       <div>
         <p>Havainnoitsijat: {observers}</p>
         <p>Valittu tila: <span className='font-bold'>{lab}</span></p>
         <p>Tarkastelukohde: <span className='font-bold'>{target}</span></p>
-        <p>Kohta: <span className='font-bold'>{targetObs[0].obj}</span></p>
-        {(oCount === 1) ? obsLabel() : <Itemselector list={targetObs}/>}
-        <Itemselector list={targetObs}/>
+        
+        {(obsCount === 1) ? <p>Kohta: <span className='font-bold'>{obsLabel()}</span></p> : Itemselector({list: targetObs, handleObsChange: handleObsChange})}
         <Item />
         <button className="nextBtn" onClick={() => nextPressed()}>{NextButtonLabel()}</button>
       </div>

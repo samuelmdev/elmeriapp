@@ -9,24 +9,24 @@ const Item = () => {
 
   console.log('Itemiin paasty')
   return (
-    <div>
-      <Dropdown list = {working} />
+    <div className='border border-black rounded-md'>
       <input
           type="textarea"
           className=""
           placeholder="Poikkeama/Toimenpide"
       />
-      <input
-        type="textarea"
-        className=""
-        placeholder="Vastuutaho"
-      />
-      <input
-        type="textarea"
-        className=""
-        placeholder="Kiireellisyys"
-      />
-  
+      <div>
+        <input
+          type="textarea"
+          className=""
+          placeholder="Vastuutaho"
+        />
+        <input
+          type="textarea"
+          className=""
+          placeholder="Kiireellisyys"
+        />
+        </div>
       <div>
         <button>Ota kuva</button>
         <button>Lisää kuva</button>

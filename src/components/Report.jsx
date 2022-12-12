@@ -1,7 +1,9 @@
+import { Input } from 'postcss';
 import React, { useState, useRef } from 'react'
 import Dropdown2 from './Dropdown2';
+import Fault from './Fault';
+import Faultslist from './Faultslist';
 import Item from './Item';
-import Itemselector from './Itemselector';
 
 const Report = () => {
 
@@ -25,11 +27,14 @@ const Report = () => {
   const [lab, setLab] = useState(null);
   const [observers, setObservers] = useState("");
   const [targetCount, setTargetCount] = useState(0);
-  const [targetObs, setTargetObs] = useState([]);
+  const [targets, setTargets] = useState({target: null, obs:[]});
   const childStateRef = useRef();
   const [target, setTarget] = useState(null)
   const [selectedObs, setSelectedObs] = useState(null)
   const [obsCount, setObsCount] = useState(0)
+  const [workingCount, setWorkingCount] = useState(0)
+  const [notWorkingCount, setNotWorkingCount] = useState(0)
+  const [showFault, setShowFault] = useState(false)
 
   let obsNumber = 0;
   let currentObsCount = 0
@@ -38,33 +43,53 @@ const Report = () => {
   let objCompleted = false
 
   let tCount = 0
-  let oCount = 0
+  let oCount = null
 
-  const nextPressed = () => {
-    if (obsCount <= 1) {
-      setTargetCount(targetCount + 1)
-      targetSelector()
-      obsCounter()
-      return
+  const toggleFaultShow = () => {
+    console.log('showFault on ', showFault)
+    let toggled = !showFault
+    setShowFault(!showFault)
+    console.log('showFault toggled')
+    console.log('showFault on ', showFault)
+  }
+
+  const incrementTargetCount = () => {
+    setTargetCount(targetCount + 1)
+  }
+
+  const incrementCount = (String) => {
+    if (String === 'ok' && workingCount < 20) {
+      let workingC = workingCount + 1
+      setWorkingCount(workingC)
     }
-    if (obsCount > 1) {
-      let list = targetObs
-      let filtered = list.filter(item => {return item.obj !== selectedObs})
-      console.log('filtered list ', filtered)
-      setTargetObs(filtered)
-      obsCounter()
+    if (String === 'notOk' && !showFault && notWorkingCount < 20) {
+      let notWorkingC = notWorkingCount + 1
+      setNotWorkingCount(notWorkingC)
+      toggleFaultShow()
     }
   }
+
+  const decrementCount = String => {
+    if (String === 'ok'&& workingCount > 0) {
+      let workingC = workingCount - 1
+      setWorkingCount(workingC)
+    }
+    if (String === 'notOk' && notWorkingCount > 0) {
+      let notWorkingC = notWorkingCount - 1
+      setNotWorkingCount(notWorkingC)
+    }
+  }
+
+  const nextPressed = () => {
+    incrementTargetCount()
+    targetSelector()
+  } 
 
   const  getChildState = () => {
     let childState = childStateRef.current.getChildOption()
     setLab(childState.label)
     targetSelector()
     obsCounter()
-  }
-
-  const handleObsChange = String => {
-    setSelectedObs(String)
   }
 
   const countTargetQuantity = () => {
@@ -75,20 +100,56 @@ const Report = () => {
   }
 
   const targetSelector = () => {
-    setTarget(obsObjects[targetCount].target)
-    setTargetObs(obsObjects[targetCount].objs)
-    console.log('targetCount on: ',targetCount)
+    setTargets({target: obsObjects[targetCount].target, obs: obsObjects[targetCount].objs})
+  }
+
+  const ItemsList = () => {
+    let count = 0
+    let itemList = []
+    console.log('Obsit on: ', targets.obs[0])
+    targets.obs.map((obs, index) => {
+      count++
+      console.log('Kohta on: ', obs.obj)
+      console.log('kohta count on: ', count)
+      itemList.push(
+        <div>
+          <p className='flex justify-left'>Kohta {index + 1}: <span className='font-bold'> {obs.obj}</span></p>
+          <hr className='bg-gray-500'/>
+          <div>
+            <p>Kunnossa</p>
+            <div>
+              <button onClick={() => decrementCount('ok')}>-</button>
+              <input
+                defaultValue={workingCount}
+                type="number"
+                onChange={(e) => {setWorkingCount(Number(e.target.value))}}
+                value={workingCount}
+                />
+              <button onClick={() => incrementCount('ok')}>+</button>
+            </div>
+          </div>
+          <div>
+            <p>Ei Kunnossa</p>
+            <div>
+              <button onClick={() => decrementCount('notOk')}>-</button>
+              <input
+                type="number"
+                defaultValue={notWorkingCount}
+                onChange={(e) => {setNotWorkingCount(Number(e.target.value))}}
+                value={notWorkingCount}
+                />
+                <button onClick={() => incrementCount('notOk')}>+</button>
+            </div>
+          </div>
+          {(showFault) ? <Fault show= {toggleFaultShow} /> : null}
+        </div>
+    )
+    })
+    return itemList
   }
 
   const obsCounter = () => {
     setObsCount(0)
-   // let obsCounter = targetObs.length
-   // setObsCount(obsCounter)
-   // console.log('Obsien maara: ', obsCounter)
-  }
-
-  const obsLabel = () => {
-    return targetObs.map((item) => item.obj)
   }
   
   const NextButtonLabel = () => {
@@ -115,19 +176,12 @@ const Report = () => {
   }
 
   const LabChosen = () => {
-    console.log(observers)
-    console.log(target)
-    console.log(targetObs)
-    console.log('kohta label:', obsLabel())
-    console.log('objektien maara: ', obsCount)
     return (
       <div>
         <p>Havainnoitsijat: {observers}</p>
         <p>Valittu tila: <span className='font-bold'>{lab}</span></p>
-        <p>Tarkastelukohde: <span className='font-bold'>{target}</span></p>
-        
-        {(obsCount === 1) ? <p>Kohta: <span className='font-bold'>{obsLabel()}</span></p> : Itemselector({list: targetObs, handleObsChange: handleObsChange})}
-        <Item />
+        <p>Tarkastelukohde: <span className='font-bold'>{targets.target}</span></p>
+        <div>{ItemsList()}</div>
         <button className="nextBtn" onClick={() => nextPressed()}>{NextButtonLabel()}</button>
       </div>
     )
@@ -140,7 +194,7 @@ const Report = () => {
   }
 
   return (
-    <div>
+    <div className='mx-5'>
       <div>
         <div className='flex flex-row justify-around'><p>Turvallisuusraportti</p><p>29.11.2022</p></div>
       {/*  <Dropdown3  list = {laborators} setLab = {setLab}/>*/}

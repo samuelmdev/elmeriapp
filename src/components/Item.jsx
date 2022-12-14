@@ -9,7 +9,7 @@ const Item = () => {
 
   console.log('Itemiin paasty')
   return (
-    <div className='border border-black rounded-md'>
+    <div class='bg-blue-400 border border-black rounded-md'>
       <input
           type="textarea"
           className=""

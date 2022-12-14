@@ -1,22 +1,22 @@
 import { Input } from 'postcss';
 import React, { useState, useRef } from 'react'
+import CompletedItems from './CompletedItems';
+import CompletedLabs from './CompletedLabs';
 import Dropdown2 from './Dropdown2';
 import Fault from './Fault';
-import Faultslist from './Faultslist';
-import Item from './Item';
 
 const Report = () => {
 
-  let laborators = [{ value: 'lab1', label: 'Lab1' },
+  const [laborators, setLaborators] = useState([{ value: 'lab1', label: 'Lab1' },
                 {value: 'lab2', label: 'Lab2' }, 
                 {value: 'lab3', label: 'Lab3' }, 
                 {value: 'lab4', label: 'Lab4' }, 
                 {value: 'lab5', label: 'Lab5' }, 
                 {value: 'lab6', label: 'Lab6' }  
-  ]
+  ])
 
   const obsObjects = [ {target: 'Työskentely', objs: [{obj: 'Riskinotto, Suojaimet, Vaatetus'}]},
-                    {target: 'Ergonomia', objs: [{obj: 'Fyysinen kuormitus', obj: 'Työpisteiden ja välineiden ergonomia'}]}, 
+                    {target: 'Ergonomia', objs: [{obj: 'Fyysinen kuormitus'}, {obj: 'Työpisteiden ja välineiden ergonomia'}]}, 
                     {target: 'Kone- ja laiteturvallisuus', objs: [{obj: 'Koneiden kunto ja suojalaitteet'}, {obj: 'Koneiden hallintalaitteet ja merkintä'}]}, 
                     {target: 'Liikkumisturvallisuus', objs: [{obj: 'Kulkuteiden ja lattian rakenne, putoamissuojaus'}, {obj: 'Poistumistiet'}]},
                     {target: 'Järjestys', objs: [{obj: 'Kulkuteiden ja lattioiden järjestys'}, {obj: 'Pöydät, päällyset, hyllyt'}, {obj: 'Jäteastiat'}]},
@@ -24,26 +24,29 @@ const Report = () => {
   ]
 
   const [started, setStarted] = useState(false);
+  const [completedLabs, setCompletedLabs] = useState([]);
+  const [completedTargets, setCompletedTargets] = useState([]);
   const [lab, setLab] = useState(null);
   const [observers, setObservers] = useState("");
   const [targetCount, setTargetCount] = useState(0);
   const [targets, setTargets] = useState({target: null, obs:[]});
   const childStateRef = useRef();
-  const [target, setTarget] = useState(null)
-  const [selectedObs, setSelectedObs] = useState(null)
-  const [obsCount, setObsCount] = useState(0)
-  const [workingCount, setWorkingCount] = useState(0)
-  const [notWorkingCount, setNotWorkingCount] = useState(0)
-  const [showFault, setShowFault] = useState(false)
+  const [targetQuantity, setTargetQuantity] = useState(0);
+  const [obsCount, setObsCount] = useState(0);
+  const [workingCount, setWorkingCount] = useState(0);
+  const [notWorkingCount, setNotWorkingCount] = useState(0);
+  const [showFault, setShowFault] = useState(false);
+  const [obsArray, setObsArray] = useState([]);
+  const [counters, setCounters] = useState([])
 
   let obsNumber = 0;
   let currentObsCount = 0
-  let targetQuantity = 0
 
   let objCompleted = false
 
   let tCount = 0
   let oCount = null
+  let curCount = null
 
   const toggleFaultShow = () => {
     console.log('showFault on ', showFault)
@@ -57,32 +60,47 @@ const Report = () => {
     setTargetCount(targetCount + 1)
   }
 
-  const incrementCount = (String) => {
-    if (String === 'ok' && workingCount < 20) {
-      let workingC = workingCount + 1
-      setWorkingCount(workingC)
+  const incrementCount = ({name, index}) => {
+    const countersCopy = [...counters]
+    if (name === 'ok') {
+      countersCopy[index].ok += 1
+      setCounters({ok: countersCopy})
     }
-    if (String === 'notOk' && !showFault && notWorkingCount < 20) {
-      let notWorkingC = notWorkingCount + 1
-      setNotWorkingCount(notWorkingC)
-      toggleFaultShow()
+    if (name === 'notOk') {
+      countersCopy[index].notOk += 1
+      setCounters({notOk: countersCopy})
     }
   }
 
-  const decrementCount = String => {
-    if (String === 'ok'&& workingCount > 0) {
-      let workingC = workingCount - 1
-      setWorkingCount(workingC)
+  const decrementCount = ({name, index}) => {
+    const countersCopy = [...counters]
+    if (name === 'ok') {
+      countersCopy[index].ok -= 1
+      setCounters({ok: countersCopy})
     }
-    if (String === 'notOk' && notWorkingCount > 0) {
-      let notWorkingC = notWorkingCount - 1
-      setNotWorkingCount(notWorkingC)
+    if (name === 'notOk') {
+      countersCopy[index].notOk -= 1
+      setCounters({notOk: countersCopy})
     }
   }
+
+  const getCurCount = (num) => {
+    console.log('num curCountissa on: ', num)
+    return curCount = num}
 
   const nextPressed = () => {
     incrementTargetCount()
-    targetSelector()
+    setCounters([])
+    if (targetCount === targetQuantity) {
+      setLabCompleted(lab)
+      setLab(null)
+      setTargets(null)
+      setTargetCount(0)
+    }else {
+      setTargetCompleted(targets.target)
+      targetSelector()
+      setCounter()
+    }
   } 
 
   const  getChildState = () => {
@@ -90,17 +108,52 @@ const Report = () => {
     setLab(childState.label)
     targetSelector()
     obsCounter()
+    setCounter()
   }
 
-  const countTargetQuantity = () => {
-    obsObjects.forEach(target => {
-      targetQuantity++
-    });
-    return targetQuantity
+  const setLabCompleted = String => {
+    setCompletedLabs([...completedLabs, String])
+    let filtered = laborators.filter(item => {return item.label !== String})
+    setLaborators(filtered)
+  }
+
+  const setTargetCompleted = String => {
+    setCompletedTargets([...completedTargets, String])
+  }
+
+  const targetCounter = () => {
+    let targetsCount = obsObjects.length
+    setTargetQuantity(targetsCount)
   }
 
   const targetSelector = () => {
+    targetCounter()
     setTargets({target: obsObjects[targetCount].target, obs: obsObjects[targetCount].objs})
+  }
+
+  const setCounter = () => {
+    targets.obs.forEach(
+      setCounters([...counters, {ok: 0, notOk: 0}])
+    )
+  }
+
+  const Counter = ({ value, incrementCount, decrementCount }) => {
+    return (
+      <div>
+        {value > 0 && (
+          <button onClick={() => decrementCount()}>
+            -
+          </button>)}
+        <input
+          type="number"
+          onChange={(e) => {value = (e.target.value)}}
+          value={value}
+          />
+        <button onClick={() => incrementCount()}>
+          +
+        </button>
+      </div>
+    )
   }
 
   const ItemsList = () => {
@@ -111,40 +164,36 @@ const Report = () => {
       count++
       console.log('Kohta on: ', obs.obj)
       console.log('kohta count on: ', count)
+      console.log('Counterit tila on: ', counters)
       itemList.push(
-        <div>
+        <div key={obs.obj}>
           <p className='flex justify-left'>Kohta {index + 1}: <span className='font-bold'> {obs.obj}</span></p>
           <hr className='bg-gray-500'/>
           <div>
             <p>Kunnossa</p>
             <div>
-              <button onClick={() => decrementCount('ok')}>-</button>
-              <input
-                defaultValue={workingCount}
-                type="number"
-                onChange={(e) => {setWorkingCount(Number(e.target.value))}}
-                value={workingCount}
-                />
-              <button onClick={() => incrementCount('ok')}>+</button>
+              <Counter
+                value={counters[index].ok}
+                incrementCount={incrementCount({name: 'ok', index: index})}
+                decrementCount={decrementCount({name: 'ok', index: index})}
+              />
             </div>
           </div>
           <div>
             <p>Ei Kunnossa</p>
             <div>
-              <button onClick={() => decrementCount('notOk')}>-</button>
-              <input
-                type="number"
-                defaultValue={notWorkingCount}
-                onChange={(e) => {setNotWorkingCount(Number(e.target.value))}}
-                value={notWorkingCount}
-                />
-                <button onClick={() => incrementCount('notOk')}>+</button>
+              <Counter
+                value={counters[index].notOk}
+                incrementCount={incrementCount({name: 'notOk', index: index})}
+                decrementCount={decrementCount({name: 'notOk', index: index})}
+              />
             </div>
           </div>
           {(showFault) ? <Fault show= {toggleFaultShow} /> : null}
         </div>
     )
     })
+    //setObsArray(obsList)
     return itemList
   }
 
@@ -153,8 +202,10 @@ const Report = () => {
   }
   
   const NextButtonLabel = () => {
-    if (obsCount === currentObsCount) return 'Seuraava kohde'
-    return 'Seuraava kohta'
+    console.log('targettien maara: ', targetQuantity)
+    console.log('targetCount on: ', targetCount)
+    if (targetCount === targetQuantity) return <p>Tila valmis</p>
+    return <p>Seuraava kohde</p>
   }
 
   const ChooseLab = () => {
@@ -168,6 +219,7 @@ const Report = () => {
           placeholder="Etunimi Sukunimi,..tai Etunimi,.."
           onChange={(event) => setObservers(event.target.value)}
         />
+        {CompletedLabs({completed: completedLabs})}
         <p>Valitse tila</p>
         <Dropdown2 list = {laborators} ref={childStateRef} />
         <button onClick={() => getChildState()}>Valitse</button>
@@ -179,6 +231,8 @@ const Report = () => {
     return (
       <div>
         <p>Havainnoitsijat: {observers}</p>
+        {CompletedLabs({completed: completedLabs})}
+        {CompletedItems({completed: {completedTargets}})}
         <p>Valittu tila: <span className='font-bold'>{lab}</span></p>
         <p>Tarkastelukohde: <span className='font-bold'>{targets.target}</span></p>
         <div>{ItemsList()}</div>
@@ -187,17 +241,10 @@ const Report = () => {
     )
   }
 
-  const plusPressed = () => {
-    console.log('Plus painettu')
-    
-    return (<div>{setStarted(true)}<Item /></div>)
-  }
-
   return (
     <div className='mx-5'>
       <div>
         <div className='flex flex-row justify-around'><p>Turvallisuusraportti</p><p>29.11.2022</p></div>
-      {/*  <Dropdown3  list = {laborators} setLab = {setLab}/>*/}
         {(lab) ? LabChosen() : ChooseLab()}
       </div>
     </div>

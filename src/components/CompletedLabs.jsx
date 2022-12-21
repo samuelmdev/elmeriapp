@@ -17,10 +17,8 @@ const CompletedLabs = ({completed}) => {
   const setCompletedList = () => {
     completedList.push(
     completedLabs.completed.forEach((item) => {completedList.push( 
-      <button className='hover:scale-125' key={item} onClick={() => {handleClick()}}>
-        <hr className='bg-gray-400' />
+      <button className='border-t-2 border-b-2 hover:bg-primary-blue hover:scale-125 hover:text-white px-8 py-1 text-lg transition ease-in-out duration-300' key={item} onClick={() => {handleClick()}}>
         <p>{item}</p>
-        <hr className='bg-gray-400' />
       </button>
     )}))
     return completedList
@@ -29,7 +27,7 @@ const CompletedLabs = ({completed}) => {
   return (
     <div>
       {(completed.length > 0) ? 
-      <div className='flex flex-col'>
+      <div className='flex flex-row justify-center mx-10'>
         {setCompletedList()}
       </div> : null}
     </div>

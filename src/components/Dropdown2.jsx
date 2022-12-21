@@ -12,7 +12,7 @@ const Dropdown2 = forwardRef((props, _ref) => {
   }))
 
   return (
-    <div>
+    <div className='flex justify-center w-80'>
       <Select
         defaultValue={selectedOption}
         onChange={setSelectedOption}

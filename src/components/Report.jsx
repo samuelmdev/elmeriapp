@@ -3,6 +3,7 @@ import React, { useState, useRef } from 'react'
 import CompletedItems from './CompletedItems';
 import CompletedLabs from './CompletedLabs';
 import Dropdown2 from './Dropdown2';
+import ItemsList from './ItemsList';
 import Fault from './Fault';
 
 const Report = () => {
@@ -32,12 +33,6 @@ const Report = () => {
   const [targets, setTargets] = useState({target: null, obs:[]});
   const childStateRef = useRef();
   const [targetQuantity, setTargetQuantity] = useState(0);
-  const [obsCount, setObsCount] = useState(0);
-  const [workingCount, setWorkingCount] = useState(0);
-  const [notWorkingCount, setNotWorkingCount] = useState(0);
-  const [showFault, setShowFault] = useState(false);
-  const [obsArray, setObsArray] = useState([]);
-  const [counters, setCounters] = useState([])
 
   let obsNumber = 0;
   let currentObsCount = 0
@@ -48,49 +43,11 @@ const Report = () => {
   let oCount = null
   let curCount = null
 
-  const toggleFaultShow = () => {
-    console.log('showFault on ', showFault)
-    let toggled = !showFault
-    setShowFault(!showFault)
-    console.log('showFault toggled')
-    console.log('showFault on ', showFault)
-  }
-
   const incrementTargetCount = () => {
     setTargetCount(targetCount + 1)
   }
 
-  const incrementCount = ({name, index}) => {
-    const countersCopy = [...counters]
-    if (name === 'ok') {
-      countersCopy[index].ok += 1
-      setCounters({ok: countersCopy})
-    }
-    if (name === 'notOk') {
-      countersCopy[index].notOk += 1
-      setCounters({notOk: countersCopy})
-    }
-  }
-
-  const decrementCount = ({name, index}) => {
-    const countersCopy = [...counters]
-    if (name === 'ok') {
-      countersCopy[index].ok -= 1
-      setCounters({ok: countersCopy})
-    }
-    if (name === 'notOk') {
-      countersCopy[index].notOk -= 1
-      setCounters({notOk: countersCopy})
-    }
-  }
-
-  const getCurCount = (num) => {
-    console.log('num curCountissa on: ', num)
-    return curCount = num}
-
   const nextPressed = () => {
-    incrementTargetCount()
-    setCounters([])
     if (targetCount === targetQuantity) {
       setLabCompleted(lab)
       setLab(null)
@@ -99,7 +56,6 @@ const Report = () => {
     }else {
       setTargetCompleted(targets.target)
       targetSelector()
-      setCounter()
     }
   } 
 
@@ -107,8 +63,6 @@ const Report = () => {
     let childState = childStateRef.current.getChildOption()
     setLab(childState.label)
     targetSelector()
-    obsCounter()
-    setCounter()
   }
 
   const setLabCompleted = String => {
@@ -129,76 +83,7 @@ const Report = () => {
   const targetSelector = () => {
     targetCounter()
     setTargets({target: obsObjects[targetCount].target, obs: obsObjects[targetCount].objs})
-  }
-
-  const setCounter = () => {
-    targets.obs.forEach(
-      setCounters([...counters, {ok: 0, notOk: 0}])
-    )
-  }
-
-  const Counter = ({ value, incrementCount, decrementCount }) => {
-    return (
-      <div>
-        {value > 0 && (
-          <button onClick={() => decrementCount()}>
-            -
-          </button>)}
-        <input
-          type="number"
-          onChange={(e) => {value = (e.target.value)}}
-          value={value}
-          />
-        <button onClick={() => incrementCount()}>
-          +
-        </button>
-      </div>
-    )
-  }
-
-  const ItemsList = () => {
-    let count = 0
-    let itemList = []
-    console.log('Obsit on: ', targets.obs[0])
-    targets.obs.map((obs, index) => {
-      count++
-      console.log('Kohta on: ', obs.obj)
-      console.log('kohta count on: ', count)
-      console.log('Counterit tila on: ', counters)
-      itemList.push(
-        <div key={obs.obj}>
-          <p className='flex justify-left'>Kohta {index + 1}: <span className='font-bold'> {obs.obj}</span></p>
-          <hr className='bg-gray-500'/>
-          <div>
-            <p>Kunnossa</p>
-            <div>
-              <Counter
-                value={counters[index].ok}
-                incrementCount={incrementCount({name: 'ok', index: index})}
-                decrementCount={decrementCount({name: 'ok', index: index})}
-              />
-            </div>
-          </div>
-          <div>
-            <p>Ei Kunnossa</p>
-            <div>
-              <Counter
-                value={counters[index].notOk}
-                incrementCount={incrementCount({name: 'notOk', index: index})}
-                decrementCount={decrementCount({name: 'notOk', index: index})}
-              />
-            </div>
-          </div>
-          {(showFault) ? <Fault show= {toggleFaultShow} /> : null}
-        </div>
-    )
-    })
-    //setObsArray(obsList)
-    return itemList
-  }
-
-  const obsCounter = () => {
-    setObsCount(0)
+    incrementTargetCount()
   }
   
   const NextButtonLabel = () => {
@@ -210,41 +95,45 @@ const Report = () => {
 
   const ChooseLab = () => {
     return (
-      <div>
-        <p>Havainnoitsijat: </p>
-        <input
-          type="text"
-          className=""
-          value={observers}
-          placeholder="Etunimi Sukunimi,..tai Etunimi,.."
-          onChange={(event) => setObservers(event.target.value)}
-        />
-        {CompletedLabs({completed: completedLabs})}
-        <p>Valitse tila</p>
-        <Dropdown2 list = {laborators} ref={childStateRef} />
-        <button onClick={() => getChildState()}>Valitse</button>
+      <div className='flex flex-col justify-center items-center content-center space-y-4 mt-4'>
+        <div>
+          <p>Havainnoitsijat: </p>
+          <input
+            type="text"
+            className=""
+            value={observers}
+            placeholder="Etunimi Sukunimi,..tai Etunimi,.."
+            onChange={(event) => setObservers(event.target.value)}
+          />
+        </div>
+        {{completedLabs} && CompletedLabs({completed: completedLabs})}
+        <div>
+          <p>Valitse tila</p>
+          <Dropdown2 list = {laborators} ref={childStateRef} />
+        </div>
+        <button className="my-2 px-3 py-1 bg-primary-blue text-white rounded-lg hover:scale-110 transition ease-in-out duration-300 text-lg" onClick={() => getChildState()}>Valitse</button>
       </div>
     )
   }
 
   const LabChosen = () => {
     return (
-      <div>
+      <div className='my-8 space-y-4 pb-8'>
         <p>Havainnoitsijat: {observers}</p>
-        {CompletedLabs({completed: completedLabs})}
-        {CompletedItems({completed: {completedTargets}})}
-        <p>Valittu tila: <span className='font-bold'>{lab}</span></p>
-        <p>Tarkastelukohde: <span className='font-bold'>{targets.target}</span></p>
-        <div>{ItemsList()}</div>
-        <button className="nextBtn" onClick={() => nextPressed()}>{NextButtonLabel()}</button>
+        {{completedLabs} && CompletedLabs({completed: completedLabs})}
+        {/*CompletedItems({completed: {completedTargets}})*/}
+        <p>Valittu tila: <span className='font-bold font-lg'>{lab}</span></p>
+        <p>Tarkastelukohde: <span className='font-bold font-md'>{targets.target}</span></p>
+        <ItemsList objects= {targets.obs} />
+        <button className="my-2 px-3 py-1 bg-primary-blue text-white rounded-lg hover:scale-110 transition ease-in-out duration-300 text-lg" onClick={() => nextPressed()}>{NextButtonLabel()}</button>
       </div>
     )
   }
 
   return (
-    <div className='mx-5'>
+    <div className='mx-10 my-8'>
       <div>
-        <div className='flex flex-row justify-around'><p>Turvallisuusraportti</p><p>29.11.2022</p></div>
+        <div className='flex flex-row justify-around mt-8'><p>Turvallisuusraportti</p><p>29.11.2022</p></div>
         {(lab) ? LabChosen() : ChooseLab()}
       </div>
     </div>

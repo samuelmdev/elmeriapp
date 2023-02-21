@@ -1,22 +1,20 @@
-import React from 'react'
-import { BrowserRouter as Router,Routes, Route, Link } from 'react-router-dom';
+import React, { useState } from 'react'
+import { BrowserRouter as Router,Routes, Route, Link, useLocation } from 'react-router-dom';
 import Report from './Report'
 import ReportsList from './ReportsList'
+import Guide from './Guide'
+import Navigation from './Navigation';
+import Header from './Header';
 
 const Home = () => {
+  const [location, setLocation] = useState(useLocation())
+
   return (
-    <div>
-    <Router>
-      <Link to='/'><button>Kotisivu</button></Link>
-      <Link to='/report'><button>Luo uusi raportti</button></Link>
-      <Link to='/reportslist'><button>Raportit</button></Link>
-        <Routes>
-          <Route exact path='/' element={this}></Route>  
-          <Route exact path='/report' element={< Report />}></Route>
-          <Route exact path='/reportslist' element={< ReportsList />}></Route>
-        </Routes>
-      </Router>
-  </div>
+    <div className='flex flex-col'>
+      {(window.location.pathname === "/") ? <div><p className='flex bg-primary-blue text-white align-items-start py-16 pl-16 text-5xl mb-16'>Elmeri</p>
+      <Navigation /></div>
+      : <Header/>}
+    </div>
   )
 }
 

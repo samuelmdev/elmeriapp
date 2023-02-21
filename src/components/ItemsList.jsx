@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import Fault from './Fault';
+import Faultslist from './Faultslist';
+import { addItems, deleteFault, setOkCount } from './Handleinputs';
 
 const ItemsList = ({objects}) => {
 
@@ -11,12 +13,11 @@ const ItemsList = ({objects}) => {
 
   useEffect(() => {
     objects.forEach((item) => {
-      objectList.push({name: item.obj, showFault: false, okCount: 0, notOkCount: 0})
+      objectList.push({name: item.obj, showFault: false, okCount: 0, notOkCount: 0, faults: []})
     })  
     setObsArray(objectList)
-    console.log('Obsit on: ', objectList)
+    addItems({objectList})
   }, [objects])
-  console.log('itemList tila on: ', obsArray)
 
   const incrementCount = ({name, index}) => {
     let stateCopy = obsArray.slice()
@@ -24,7 +25,7 @@ const ItemsList = ({objects}) => {
       if (stateCopy[index].okCount < 15) {
         stateCopy[index].okCount += 1
         setObsArray(stateCopy)
-        console.log('increment tila on: ', obsArray)
+        setOkCount({count:stateCopy[index].okCount, index:index})
       }
     }
     if (name === 'notOk' && !stateCopy[index].showFault) {
@@ -32,7 +33,6 @@ const ItemsList = ({objects}) => {
         stateCopy[index].notOkCount += 1
         setObsArray(stateCopy)
         toggleFaultShow({index: index})
-        console.log('increment tila on: ', obsArray)
       }
     }
   }
@@ -42,13 +42,35 @@ const ItemsList = ({objects}) => {
     if (name === 'ok') {
       stateCopy[index].okCount -= 1
       setObsArray(stateCopy)
-      console.log('decrement tila on: ', obsArray)
+      setOkCount({count:stateCopy[index].okCount, index:index})
     }
     if (name === 'notOk' && !stateCopy[index].showFault) {
       stateCopy[index].notOkCount -= 1
+      stateCopy[index].faults.pop()
+      deleteFault({index:index})
       setObsArray(stateCopy)
-      console.log('decrement tila on: ', obsArray)
     }
+  }
+
+  const handleCancel = ({index}) => {
+    let stateCopy = obsArray.slice()
+    stateCopy[index].notOkCount -= 1
+    setObsArray(stateCopy)
+  }
+
+  const addFaultAtIndex = ({fault, index}) => {
+    let stateCopy = obsArray.slice()
+    stateCopy[index].faults.push(fault)
+    setObsArray(stateCopy)
+  }
+
+  const deleteFaultFromArray = ({index, fIndex}) => {
+    let stateCopy = obsArray.slice()
+    console.log('delete obs indeksi:', index)
+    console.log('delete indeksi:', fIndex)
+    stateCopy[index].faults.splice(fIndex, 1)
+    stateCopy[index].notOkCount -= 1
+    setObsArray(stateCopy)
   }
 
   const Counter = ({ value, incrementCount, decrementCount }) => {
@@ -87,7 +109,6 @@ const ItemsList = ({objects}) => {
     let stateCopy = obsArray.slice()
     stateCopy[index].showFault = !stateCopy[index].showFault
     setObsArray(stateCopy)
-    console.log('tila toggled:', obsArray)
   }
 
   return (
@@ -96,7 +117,7 @@ const ItemsList = ({objects}) => {
           <div className='my-5' key={item.name}>
             <p className='flex justify-left mx-6'>Kohta {index + 1}:<span className='font-bold pl-2'> {item.name}</span></p>
             <hr className='bg-gray-500 m-b-1'/>
-            <div className='flex flex-row justify-center m-t-1 space-x-10'>
+            <div className='flex flex-row justify-center m-t-1 space-x-16 mb-2'>
               <div>
                 <p>Kunnossa</p>
                 <div>
@@ -118,7 +139,8 @@ const ItemsList = ({objects}) => {
                 </div>
               </div>
             </div>
-            {(obsArray[index].showFault) && <Fault decrement={() => decrementCount({name: 'notOk', index: index})} number={obsArray[index].notOkCount} show={() => toggleFaultShow({index: index})} />}
+            {(obsArray[index].showFault) && <Fault index={index} cancel={() => handleCancel({index: index})} increment={() => incrementCount({name: 'notOk', index: index})} number={obsArray[index].notOkCount} show={() => toggleFaultShow({index: index})} addFault={(fault) => addFaultAtIndex({fault: fault, index: index})} />}
+            {(obsArray[index].faults.length > 0) && <Faultslist oIndex={index} faults={obsArray[index].faults} deleteFault={deleteFaultFromArray} />}
           </div>
   ))
   }</div>)

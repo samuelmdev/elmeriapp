@@ -24,7 +24,6 @@ const CompletedItems = ({room}) => {
       newBool = !isOpen}
     setTargetIndex(index)
     console.log('targetIndex on: ', index)
-   // ObsList()
     setIsOpen(newBool)
   }
 
@@ -35,7 +34,7 @@ const CompletedItems = ({room}) => {
 
   const obsList = () => {
     return (
-      (targetIndex) && (filteredItems) && 
+      (filteredItems) && 
         <div className='flex flex-col my-6 justify-left'>
           {filteredItems[0].targets[targetIndex].obs.map((item) => (
             <div className='my-4'>

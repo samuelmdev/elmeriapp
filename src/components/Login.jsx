@@ -31,26 +31,6 @@ const Login = () => {
           onChange={(e) => setPassword(e.target.value)}
           placeholder="Password"
         />
-        {/*
-        <Navigate to="./Home" replace={true} />
-        
-        <Router>
-          <Link to="/home">
-            Enter
-          </Link>
-          <Routes>
-            <Route exact path='/home' element={< Home />} />
-          </Routes>
-        </Router>
-        <button><Navigator target="Home"/>Enter</button>
-        <Router>
-          <Link to="/">
-            <button>Enter</button>
-          </Link>
-          <Routes>
-            <Route exact path='/' element={< Home />}></Route>
-          </Routes>
-  </Router> */}
       </div>
     </div>
   )

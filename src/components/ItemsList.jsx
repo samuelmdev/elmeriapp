@@ -1,24 +1,26 @@
 import React, { useState, useEffect } from 'react'
 import Fault from './Fault';
 import Faultslist from './Faultslist';
-import { addItems, deleteFault, setOkCount } from './Handleinputs';
+import { addItems, deleteFault, setOkCount, getFaults } from './Handleinputs';
 
 const ItemsList = ({objects}) => {
 
   const [obsArray, setObsArray] = useState([]);
-  const [itemListComponent, setItemListComponent] = useState();
 
-  let itemList = []
   let objectList = []
 
+  // propsina tuoduille kohteille täyttää objektilistan tietojen tallennukseen
   useEffect(() => {
     objects.forEach((item) => {
       objectList.push({name: item.obj, showFault: false, okCount: 0, notOkCount: 0, faults: []})
     })  
     setObsArray(objectList)
     addItems({objectList})
+    console.log('itemList props: ', objects)
   }, [objects])
 
+  // kasvattaa kunnossa/ei kunnossa lukumääriä
+  // päivittää tilan ja lisää myös datan Handleinputs listaan
   const incrementCount = ({name, index}) => {
     let stateCopy = obsArray.slice()
     if (name === 'ok') {
@@ -31,12 +33,14 @@ const ItemsList = ({objects}) => {
     if (name === 'notOk' && !stateCopy[index].showFault) {
       if (stateCopy[index].notOkCount < 15) {
         stateCopy[index].notOkCount += 1
+        stateCopy[index].showFault = !stateCopy[index].showFault
         setObsArray(stateCopy)
-        toggleFaultShow({index: index})
       }
     }
   }
 
+  // pienentää kunnossa/ei kunnossa lukuja
+  // poistaa viimeisimmän ei kunnossa kohdan, jos ei kunnossa määrä vähenee
   const decrementCount = ({name, index}) => {
     let stateCopy = obsArray.slice()
     if (name === 'ok') {
@@ -52,18 +56,28 @@ const ItemsList = ({objects}) => {
     }
   }
 
+  // poikkeuksen täytön peruutus
   const handleCancel = ({index}) => {
     let stateCopy = obsArray.slice()
     stateCopy[index].notOkCount -= 1
+    stateCopy[index].showFault = !stateCopy[index].showFault
     setObsArray(stateCopy)
   }
 
+  // 
   const addFaultAtIndex = ({fault, index}) => {
     let stateCopy = obsArray.slice()
-    stateCopy[index].faults.push(fault)
+    console.log('addFault obsArray ennen push: ', obsArray)
+   // stateCopy[index].faults.push(fault)
+    stateCopy[index].faults = getFaults({index:index})
+    stateCopy[index].showFault = !stateCopy[index].showFault
     setObsArray(stateCopy)
+    console.log('fault lisatty: ', fault)
+    console.log('addFault stateCopy: ', stateCopy)
   }
 
+
+  // poistaa poikkeuksien listasta poikkeuksen indeksin mukaan
   const deleteFaultFromArray = ({index, fIndex}) => {
     let stateCopy = obsArray.slice()
     console.log('delete obs indeksi:', index)
@@ -73,19 +87,22 @@ const ItemsList = ({objects}) => {
     setObsArray(stateCopy)
   }
 
+  const faultListEdited = (props) => {
+    let stateCopy = obsArray.slice()
+    stateCopy[props.oIndex].faults = getFaults({index:props.oIndex})
+    setObsArray(stateCopy)
+    console.log('faultListEdited suoritettu', stateCopy)
+  }
+
+  // laskuri kunnossa/ei kunnossa kohdille
   const Counter = ({ value, incrementCount, decrementCount }) => {
     return (
       <div className='mx-4 space-x-2'>
-        {value > 0 && (
+        {(value > 0) ? 
           <button className='bg-light-blue/80 hover:bg-bright-blue text-gray-800 font-bold py-2 px-4 rounded-lg' onClick={decrementCount}>
             -
-          </button>)}
-          {/*
-        <input
-          type="number"
-          onChange={(e) => {value = (e.target.value)}}
-          value={value}
-        /> */}
+          </button> :
+          <button className='px-4 py-2 font-bold invisible'>-</button>}
         <span>{value}</span>
         <button className='bg-light-blue/80 hover:bg-bright-blue text-gray-800 font-bold py-2 px-4 rounded-lg' onClick={incrementCount}>
           +
@@ -93,29 +110,14 @@ const ItemsList = ({objects}) => {
       </div>
     )
   }
-
-  const setCounter = () => {
-  }
-
-  const obsCounter = () => {
-  }
-
-  const itemListSetter = (props) => {
-    setItemListComponent(props.list)
-    return itemListComponent
-  }
-
-  const toggleFaultShow = ({index}) => {
-    let stateCopy = obsArray.slice()
-    stateCopy[index].showFault = !stateCopy[index].showFault
-    setObsArray(stateCopy)
-  }
-
+ 
+  // tilan ollessa valittuna näyttää jokaiselle kohteelle 
   return (
     <div>{
       obsArray.map((item, index) => (
-          <div className='my-5' key={item.name}>
-            <p className='flex justify-left mx-6'>Kohta {index + 1}:<span className='font-bold pl-2'> {item.name}</span></p>
+        <div className='my-5' key={item.name}>
+        {console.log('mapped item', item)}
+          <p className='flex justify-left mx-6'>Kohta {index + 1}:<span className='font-bold pl-2'> {item.name}</span></p>
             <hr className='bg-gray-500 m-b-1'/>
             <div className='flex flex-row justify-center m-t-1 space-x-16 mb-2'>
               <div>
@@ -139,9 +141,9 @@ const ItemsList = ({objects}) => {
                 </div>
               </div>
             </div>
-            {(obsArray[index].showFault) && <Fault index={index} cancel={() => handleCancel({index: index})} increment={() => incrementCount({name: 'notOk', index: index})} number={obsArray[index].notOkCount} show={() => toggleFaultShow({index: index})} addFault={(fault) => addFaultAtIndex({fault: fault, index: index})} />}
-            {(obsArray[index].faults.length > 0) && <Faultslist oIndex={index} faults={obsArray[index].faults} deleteFault={deleteFaultFromArray} />}
-          </div>
+            {(obsArray[index].showFault) && <Fault index={index} cancel={() => handleCancel({index: index})} number={obsArray[index].notOkCount} addFault={addFaultAtIndex} edit={false} />}
+            {(obsArray[index].faults.length > 0) && <Faultslist oIndex={index} faults={obsArray[index].faults} deleteFault={deleteFaultFromArray} editFaultList={faultListEdited} />}
+        </div>
   ))
   }</div>)
 }

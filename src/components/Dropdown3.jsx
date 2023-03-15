@@ -6,9 +6,6 @@ const Dropdown3 =(props) => {
   console.log('lista on dropdownissa', props.list)
   let options = []
   props.list.forEach((item) => options.push([{value: `${item.obj}`, label: `${item.obj}`}]))
-  
-  console.log('mapattu lista:', props.list.map((item) => item.obj))
-  console.log('options lista: ', options)
 
   const handleChange = (e) => {
     setSelectedOption(e)

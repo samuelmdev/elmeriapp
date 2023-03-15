@@ -23,7 +23,7 @@ const CompletedLabs = ({completed}) => {
 
   const setCompletedList = () => {
     completedLabs.forEach((item, index) => {completedList.push( 
-      <button className='border-b-2 hover:bg-primary-blue hover:scale-125 hover:text-white px-8 py-1 text-lg transition ease-in-out duration-300' key={item} onClick={() => {handleClick(index)}}>
+      <button className='border-b-2 border-t-2 hover:bg-primary-blue hover:scale-125 hover:text-white px-8 py-1 text-lg transition ease-out duration-150' key={item} onClick={() => {handleClick(index)}}>
         <p>{item}</p>
       </button>
     )})
@@ -33,8 +33,11 @@ const CompletedLabs = ({completed}) => {
   return (
     <div>
       {(completedLabs) ? 
-      <div className='flex flex-row justify-center mx-10'>
-        {setCompletedList()}
+      <div className='flex flex-col'>
+        <p className='text-lg mx-10'>Suoritetut tilat</p>
+        <div className='flex flex-row justify-center mx-10'>
+          {setCompletedList()}
+        </div>
       </div> : null}
       {(selectedRoom) && <CompletedItems room={selectedRoom} />}
     </div>

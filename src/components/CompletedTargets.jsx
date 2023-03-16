@@ -4,19 +4,16 @@ import Handleinputs from './Handleinputs'
 const CompletedTargets = ({completed}) => {
 
   const[targetArray, setTargetArray] = useState()
-  const[faultsShow, setFaultsShow] = useState([])
-  const[filteredTarget, setFilteredTarget] = useState()
-  const[mappedTargets, setMappedTargets] = useState()
+  const[percentIndex, setPercentIndex] = useState(0)
   let room = []
   let completedTargetsList = []
   let editedTargetsList = []
-  let mappedList = []
-  let mappedObs = []
-  let filteredList = []
+  let mappedFaults = []
+  let okAmount = 0
+  let notOkAmount = 0
 
   useEffect(() => {
     completedTargetsList = Handleinputs()
-    console.log('completed targets useEffect suoritettu')
     setTargetArray(editArray())
   }, [])
 
@@ -27,27 +24,26 @@ const CompletedTargets = ({completed}) => {
         let found = editedTargetsList.find(item => item.target === target.name)
         if (!found) editedTargetsList.push({target: target.name, obs: []})
         target.obs.map((item, oIndex) => {
+          okAmount += parseInt(item.okCount)
+          notOkAmount += parseInt(item.notOkCount)
           let foundO = editedTargetsList[tIndex].obs.find(listItem => listItem.name === item.name)
-          if (!foundO) {editedTargetsList[tIndex].obs.push({name: item.name, okCount: item.okCount, notOkCount: item.notOkCount, showFaults: false, faults:[{room: room[index], roomFaults: [...item.faults]}]})
-          console.log('if push suoritettu')
-        }
+          if (!foundO) {
+            if (item.notOkCount > 0) { editedTargetsList[tIndex].obs.push({name: item.name, okCount: item.okCount, notOkCount: item.notOkCount, showFaults: false, faults:[{room: room[index], roomFaults: [...item.faults]}]})
+            } else { editedTargetsList[tIndex].obs.push({name: item.name, okCount: item.okCount, notOkCount: item.notOkCount, showFaults: false, faults:[]})}
+          }
           else {
             editedTargetsList[tIndex].obs[oIndex].okCount += item.okCount
             editedTargetsList[tIndex].obs[oIndex].notOkCount += item.notOkCount
-            editedTargetsList[tIndex].obs[oIndex].faults.push({room: room[index], roomFaults: [...item.faults]})
-            console.log('else add suoritettu')
+            if (item.notOkCount > 0) {editedTargetsList[tIndex].obs[oIndex].faults.push({room: room[index], roomFaults: [...item.faults]})}
           }
         })
       })
     })
-    //setTargetArray(editedTargetsList)
-    console.log('valmis array kohteittain:', editedTargetsList)
+    calculateIndex()
     return editedTargetsList
   }
 
   const handleShowFaults = (props) => {
-    console.log('handleShowFaultsin props:', props)
-    console.log('showFaults value: ', targetArray[props.tIndex].obs[props.tIndex])
     let stateCopy = targetArray.slice()
     stateCopy[props.tIndex].obs[props.oIndex].showFaults = !stateCopy[props.tIndex].obs[props.oIndex].showFaults
     setTargetArray(stateCopy)
@@ -59,24 +55,33 @@ const CompletedTargets = ({completed}) => {
         <p className='border-b-2'>{obj.name}</p>
         <p>Kunnossa: {obj.okCount}</p>
         <p>Ei kunnossa: {obj.notOkCount}</p>
+        {(obj.faults.length > 0) && 
+        <>
         <button onClick={() => handleShowFaults({tIndex, oIndex})} className='border-b-2 bg-light-blue py-1 px-16 my-2 font-md'>Näytä poikkeukset</button>
         {obj.faults.map((fault, index) => {
           <p>Tila: {fault.room}</p>
         })}
         {(obj.showFaults) && mapFaults({tIndex, oIndex})}
+        </>}
         </div>
     )))
   }
 
   const mapFaults = (props) => {
-    console.log("mapfaults propsit:", props)
-    return(targetArray[props.tIndex].obs[props.oIndex].faults.map((fault, index) => (
-      <div>
-        <p>{fault.room}</p>
-        <p></p>
-      </div>
-    ))
+    targetArray[props.tIndex].obs[props.oIndex].faults.map((fault, index) => {
+      if (fault.roomFaults.length > 0) {
+        mappedFaults.push(
+        <div>
+          <p>{fault.room}</p>
+          <div>
+            <p>{fault.roomFaults.exception}</p>
+            <p>{fault.roomFaults.responsible}</p>
+            <p>{fault.roomFaults.urgency}</p>
+          </div>
+        </div>)
+      }}
     )
+    return mappedFaults
   }
 
   const mapTargetList = () => {
@@ -89,12 +94,23 @@ const CompletedTargets = ({completed}) => {
           </div>
         </div>
       )))
-  
+  }
+
+  const calculateIndex = () => {
+    let result = Number(okAmount/(okAmount+notOkAmount))
+    result = result * 100
+    result = result.toFixed(2)
+    setPercentIndex(result)
   }
 
   return (
-    <div>
-      {(targetArray) ? <div className='flex flex-col gap-4'>{mapTargetList()}</div> : null}
+    <div className='flex flex-row'>
+      {(targetArray) ? <div className='flex flex-col gap-4 mb-40'>{mapTargetList()}</div> : null}
+      <div className='float-right object-right-top fixed bottom-10 left-10 py-2 px-2 border-2 rounded-md bg-white opacity-100'>
+        <p className='font-bold'>Indeksi: </p>
+        <div className='flex flex-row'><div><p>Kunnossa</p><p className='border-t-2'>(Kunnossa+Ei kunnossa)</p></div><p className='my-3 ml-1'>x100</p></div>
+        <p className='font-semibold'>= {percentIndex}</p>
+      </div>
     </div>
   )
 }

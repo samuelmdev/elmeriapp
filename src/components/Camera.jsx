@@ -47,15 +47,28 @@ const Camera = () => {
     videoRef.current.srcObject = null;
   };
 
+  const handleNewCapture = () => {
+    setPhotoURL(null)
+    handleStartCapture()
+  }
+
+  const handleAccept = () => {
+    
+  }
+
   // Kamera-komponentin näkymä
   return (
     <div>
       {(photoURL) ? 
-        <img src={photoURL} alt="Otettu kuva" /> :
+        <>
+          <img src={photoURL} alt="Otettu kuva" />
+          <button className='border-2 border-oamk-orange rounded-lg mx-2 my-1 px-3 py-1 ml-4 hover:scale-110 transition ease-in-out duration-300 hover:bg-oamk-orange' onClick={handleNewCapture}>Ota uusi kuva</button>
+          <button className='border-2 border-primary-blue rounded-lg mx-2 my-1 px-3 py-1 ml-4 hover:scale-110 transition ease-in-out duration-300 hover:bg-primary-blue hover:text-white' onClick={handleAccept}>Tallenna kuva</button>
+        </> :
         <>
           <video ref={videoRef} />
           <canvas ref={canvasRef} width={640} height={480} style={{ display: 'none' }} />
-          <button onClick={handleCapture}>Ota kuva</button>
+          <button className='border-2 border-primary-blue rounded-lg mx-2 my-1 px-3 py-1 ml-4 hover:scale-110 transition ease-in-out duration-300 hover:bg-primary-blue hover:text-white' onClick={handleCapture}>Ota kuva</button>
         </>}
     </div>
   )

@@ -75,8 +75,8 @@ const Fault = (props) => {
           defaultValue={responsible}
           onChange={(e) => setResponsible(e.target.value)}
         />
-        <div className='flex flex-row items-start w-1/3'>
-          <p className='mt-2'>Kiireellisyys:</p>
+        <div className='flex flex-row justify-start w-1/3'>
+          <p className='mt-2 mr-2'>Kiireellisyys:</p>
           <Dropdown2 list={urgencyArray} selected={urgency} ref={childStateRef} />
         </div>
       </div>

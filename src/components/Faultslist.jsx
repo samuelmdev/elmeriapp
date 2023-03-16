@@ -13,7 +13,6 @@ const Faultslist = ({oIndex, faults, deleteFault, editFaultList}) => {
   
   // asetta propseista saaduista poikkeuksista listan tilaan
   useEffect(() => {
-    console.log('Faultlist fault on: ', faults)
     faults.forEach(item => {
       editArray.push(false)
     })
@@ -27,28 +26,18 @@ const Faultslist = ({oIndex, faults, deleteFault, editFaultList}) => {
   }
 
   const editReady = () => {
-   /* console.log('faultEdited indeksi: ', oIndex)
-    let stateCopy = faultArray.slice()
-    console.log('editReady faultArray: ', getFaults({index:oIndex}))
-    stateCopy.fault = getFaults({index:oIndex})
-    setFaultArray(stateCopy)
-    console.log('editReady faultArray: ', faultArray) */
     editFaultList({oIndex:oIndex})
   }
 
   const handleChange = (props) => {
-    console.log('handleChange props: ', props)
     let stateCopy = editFault.slice()
     stateCopy[props.fIndex] = !stateCopy[props.fIndex]
     fIndex = props.fIndex
     setEditFault(stateCopy)
-   // console.log('fault at index:', getFaultDataAtIndex({index:oIndex, fIndex:props.fIndex}))
   }
 
   // poistaa indeksin mukaisen poikkeuksen listasta
   const handleDelete = ({fIndex}) => {
-    console.log('delete painettu')
-    console.log('delete fIndex:', fIndex)
     deleteFault({index:oIndex, fIndex:fIndex})
     deleteFaultAtIndex({index:oIndex, fIndex:fIndex})
   }

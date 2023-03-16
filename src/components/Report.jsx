@@ -4,6 +4,7 @@ import Dropdown2 from './Dropdown2';
 import ItemsList from './ItemsList';
 import { addRoom, addTargets } from './Handleinputs';
 import CompletedTargets from './CompletedTargets';
+import GuideModal from './GuideModal';
 
 // raportti komponentti
 const Report = () => {
@@ -37,6 +38,7 @@ const Report = () => {
   const inputRef = useRef();
   const [targetQuantity, setTargetQuantity] = useState(0);
   const [showCompleted, setShowCompleted] = useState([false, false]);
+  const [openModal, setOpenModal] = useState(false)
 
   // asettaa nykyisen päivämäärän reaporttiin
   const setDate = () => {
@@ -110,7 +112,6 @@ const Report = () => {
   const addObserver = () => {
     setObservers([...observers, observer])
     setObserver("")
-    console.log('observers:', observers)
     inputRef.current.focus()
   }
 
@@ -123,19 +124,13 @@ const Report = () => {
     return obsString
   }
 
-  const handleShow = (props) => {
-    let stateCopy = showCompleted
-    if (stateCopy[props.index]) stateCopy[props.index] = !stateCopy[props.index]
-    else {
-      stateCopy = [false, false]
-      stateCopy[props.index] = !stateCopy[props.index]
-    }
-    setShowCompleted(stateCopy)
-  }
-
   // asettaa huoneenvalinta-näppäimen tekstin
   const nextRoomText = () => {
     return ((completedLabs.length > 0) ? <p className='text-xl'>Valitse seuraava tila</p> : <p className='text-xl'>Valitse tila</p>)
+  }
+
+  const closeModal = () => {
+    setOpenModal(false)
   }
 
   // vaihtaa tilan, kun kutsutaan raportin valmistuessa
@@ -147,16 +142,6 @@ const Report = () => {
   const ChooseLab = () => {
     return (
       <div className='flex flex-col justify-center items-center content-center space-y-4 mt-10'>
-      {/*  <div>
-          <p>Havainnoitsijat: </p>
-          <input
-            type="text"
-            className="px-1 py-1 border border-black rounded-lg"
-            value={observers}
-            placeholder="Etunimi Sukunimi,..."
-            onChange={(event) => setObservers(event.target.value)}
-          />
-    </div> */}
         {(!ready) ?
         <div className='flex flex-col justify-center items-center content-center'>
           {/*(showCompleted[0] && completedLabs.length > 0) ? <CompletedTargets completed={completedLabs} /> : null*/}
@@ -167,7 +152,7 @@ const Report = () => {
           </div>
           <button className="my-2 px-5 py-1 bg-primary-blue text-white rounded-lg hover:scale-110 transition ease-in-out duration-300 text-xl" onClick={() => getChildState()}>Valitse</button></div> :
           <div className='pt-10'>
-            <p className='mb-4'>Kaikki tilat suoritettu</p>
+            <p className='mb-4 text-lg'>Kaikki tilat suoritettu</p>
             <button onClick={() => {reportReady()}} className="my-2 px-5 py-1 bg-primary-blue text-white rounded-lg hover:scale-110 transition ease-in-out duration-300 text-xl">Raportti valmis</button>  
           </div>}
         </div> :
@@ -180,10 +165,10 @@ const Report = () => {
   const LabChosen = () => {
     return (
       <div className='my-8 space-y-4 pb-8'>
-       {/* <p>Havainnoitsijat: {observers}</p> */}
         {console.log('raportin completedLabs: ', completedLabs)}
-        {/*CompletedItems({completed: {completedTargets}})*/}
         <p>Valittu tila: <span className='font-bold font-lg'>{lab}</span></p>
+        {/*<button onClick={() => setOpenModal(true)}>Modal</button>
+        <GuideModal open={openModal} handleClose={closeModal} room={lab} /> */}
         <p>Tarkastelukohde: <span className='font-bold font-md'>{targets.target}</span></p>
         {addTargets({target: targets.target})}
         <ItemsList objects= {targets.obs} />
@@ -196,8 +181,8 @@ const Report = () => {
   return (
     <div className='mx-10 my-8'>
       <div>
-        <div className='flex flex-row justify-around mt-8 text-lg'><p>Turvallisuusraportti</p><p>{setDate()}</p></div>
-        <div className='flex flex-row justify-around mt-8 text-lg'>
+        <div className='flex flex-row justify-around mt-8 text-xl'><p>Turvallisuusraportti</p><p>{setDate()}</p></div>
+        <div className='flex flex-row justify-around mt-6 text-lg'>
           {(lab || completedLabs.length > 0) ?
             <p>Havainnoitsijat: {mapObservers()}</p> :
             <div>

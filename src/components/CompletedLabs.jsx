@@ -9,7 +9,6 @@ const CompletedLabs = ({completed}) => {
   let completedItems = []
   const [selectedRoom, setSelectedRoom] = useState('')
 
- // if (completed.length > 0) {setCompletedLabs(completed)}
   useEffect(() => {
     setCompletedLabs(completed)}, [completed])
   

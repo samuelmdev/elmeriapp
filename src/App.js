@@ -4,8 +4,8 @@ import Report from './components/Report'
 import ReportsList from './components/ReportsList'
 import Guide from './components/Guide'
 import './App.css';
-import Home from './components/Home';
 import Header from './components/Header';
+import Navigation from './components/Navigation';
 
 function App() {
   return (
@@ -14,7 +14,7 @@ function App() {
         <div>
           <Header/>
           <Routes>
-            <Route path='/' element={<Home/>}/>
+            <Route path='/' element={<Navigation/>}/>
             <Route path='/report' element={<Report/>}/>
             <Route path='/reportslist' element={<ReportsList/>}/>
             <Route path='/guide' element={<Guide/>}/>

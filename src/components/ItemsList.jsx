@@ -16,7 +16,6 @@ const ItemsList = ({objects}) => {
     })  
     setObsArray(objectList)
     addItems({objectList})
-    console.log('itemList props: ', objects)
   }, [objects])
 
   // kasvattaa kunnossa/ei kunnossa lukumääriä
@@ -67,21 +66,15 @@ const ItemsList = ({objects}) => {
   // 
   const addFaultAtIndex = ({fault, index}) => {
     let stateCopy = obsArray.slice()
-    console.log('addFault obsArray ennen push: ', obsArray)
-   // stateCopy[index].faults.push(fault)
     stateCopy[index].faults = getFaults({index:index})
     stateCopy[index].showFault = !stateCopy[index].showFault
     setObsArray(stateCopy)
-    console.log('fault lisatty: ', fault)
-    console.log('addFault stateCopy: ', stateCopy)
   }
 
 
   // poistaa poikkeuksien listasta poikkeuksen indeksin mukaan
   const deleteFaultFromArray = ({index, fIndex}) => {
     let stateCopy = obsArray.slice()
-    console.log('delete obs indeksi:', index)
-    console.log('delete indeksi:', fIndex)
     stateCopy[index].faults.splice(fIndex, 1)
     stateCopy[index].notOkCount -= 1
     setObsArray(stateCopy)
@@ -91,7 +84,6 @@ const ItemsList = ({objects}) => {
     let stateCopy = obsArray.slice()
     stateCopy[props.oIndex].faults = getFaults({index:props.oIndex})
     setObsArray(stateCopy)
-    console.log('faultListEdited suoritettu', stateCopy)
   }
 
   // laskuri kunnossa/ei kunnossa kohdille

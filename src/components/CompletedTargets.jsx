@@ -40,6 +40,7 @@ const CompletedTargets = ({completed}) => {
       })
     })
     calculateIndex()
+    console.log('editedTargetsList: ', editedTargetsList)
     return editedTargetsList
   }
 
@@ -51,7 +52,7 @@ const CompletedTargets = ({completed}) => {
 
   const mapObs = ({tIndex}) => {
     return (targetArray[tIndex].obs.map((obj, oIndex) => (
-      <div className='m-b-2'>
+      <div className='mb-2 mx-20'>
         <p className='border-b-2'>{obj.name}</p>
         <p>Kunnossa: {obj.okCount}</p>
         <p>Ei kunnossa: {obj.notOkCount}</p>
@@ -72,11 +73,22 @@ const CompletedTargets = ({completed}) => {
       if (fault.roomFaults.length > 0) {
         mappedFaults.push(
         <div>
-          <p>{fault.room}</p>
-          <div>
-            <p>{fault.roomFaults.exception}</p>
-            <p>{fault.roomFaults.responsible}</p>
-            <p>{fault.roomFaults.urgency}</p>
+          <div className='flex flex-row gap-4'>
+            <p className='font-semibold'>Tila: {fault.room}</p>
+            {(fault.roomFaults.length > 1) ? <p>{fault.roomFaults.length} poikkeusta</p> :
+            <p>{fault.roomFaults.length} poikkeus</p>}
+          </div>
+          <div className='border rounded-md gap-4'>
+            {/*mapRoomFaults({faultsList:fault.roomFaults, index:index})*/}
+            {fault.roomFaults.map(roomFault => {
+              return(<div className='flex flex-col items-center my-4 px-2'>
+                <p><span className='font-semibold'>Poikkeama/toimenpide: </span>{roomFault.exception}</p>
+                <div className='flex flex-row gap-2'>
+                  <p><span className='font-semibold'>Vastuutaho: </span>{roomFault.responsible}</p>
+                  <p><span className='font-semibold'>Kiireellisyys: </span>{roomFault.urgency}</p>
+                </div>
+              </div>)
+            })}
           </div>
         </div>)
       }}
@@ -84,11 +96,24 @@ const CompletedTargets = ({completed}) => {
     return mappedFaults
   }
 
+  const mapRoomFaults = ({faultsList, index}) => {
+    let fault = null
+    console.log('mapRoomFaults faultList', faultsList)
+    fault = faultsList.map((item) => {
+      <div>
+        <p>{item.exception}</p>
+        <p>{item.responsible}</p>
+        <p>{item.urgency}</p>
+      </div>
+    })
+    return fault
+  }
+
   const mapTargetList = () => {
       return(
       targetArray.map((item, index) => (
         <div className='flex flex-col justify-items-start' key={item}>
-          <p className='border-b-2 px-8 font-bold text-lg'>{item.target}</p>
+          <p className='border-b-2 mx-20 px-10 mb-2 font-bold text-lg'>{item.target}</p>
           <div>
             {mapObs({tIndex:index})}
           </div>
